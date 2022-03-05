@@ -4,9 +4,9 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-fastapi = "*"
-uvicorn = {extras = ["standard"], version = "*"}
-slowapi = "*"
+flask = "*"
+flask-limiter = "*"
+flask-basicauth = "*"
 
 [dev-packages]
 

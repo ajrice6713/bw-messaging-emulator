@@ -1,27 +1,58 @@
-import uvicorn
-from typing import Optional
-from fastapi import FastAPI, Request, Response
+import os
+import json
+from flask import Flask, request
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from flask_basicauth import BasicAuth
 
-from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.util import get_remote_address
-from slowapi.errors import RateLimitExceeded
-
-limiter = Limiter(key_func=get_remote_address)
-app = FastAPI()
-app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+username = os.environ['BW_USERNAME']
+password = os.environ['BW_PASSWORD']
 
 
-@app.get("/")
-@limiter.limit("2/minute")
-def status_check(request: Request):
-    """
-    Test endpoint to ensure the server is running
-    :param request:
-    :return:
-    """
-    return "Hello World"
+app = Flask(__name__)
+limiter = Limiter(
+    app,
+    key_func=get_remote_address,
+    default_limits=["60/minute"]
+)
+app.config['BASIC_AUTH_USERNAME'] = username
+app.config['BASIC_AUTH_PASSWORD'] = password
+app.config['BASIC_AUTH_REALM'] = 'api'
+basic_auth = BasicAuth(app)
 
 
-if __name__ == "__main__":
-    uvicorn.run("main:app", port=5000, debug=True, reload=True)
+def send_callback():
+    return
+
+
+@app.route('/', methods=['GET'])
+@limiter.limit("5/minute", override_defaults=True)
+@basic_auth.required
+def status_check():
+    data = {'message': 'hello world'}
+    response = app.response_class(
+        response=json.dumps(data),
+        status=200,
+        mimetype='application/json'
+    )
+    return response
+
+
+@app.route('/users/<userId>/messages', methods=['POST'])
+@limiter.limit("60/minute")
+@basic_auth.required
+def handle_message_request(userId):
+    request_data = request.get_json()
+    print(request_data)
+
+    data = request_data
+    response = app.response_class(
+        response=json.dumps(data),
+        status=201,
+        mimetype='application/json'
+    )
+    return response
+
+
+if __name__ == '__main__':
+    app.run(port=5000, debug=True)
