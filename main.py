@@ -1,5 +1,11 @@
 import os
 import json
+
+from models.callback import Callback
+from models.create_message_response import CreateMessageResponse
+
+from rich import print, inspect
+
 from flask import Flask, request
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -21,7 +27,8 @@ app.config['BASIC_AUTH_REALM'] = 'api'
 basic_auth = BasicAuth(app)
 
 
-def send_callback():
+def send_callback(data):
+    callback_object = Callback(data)
     return
 
 
@@ -42,15 +49,16 @@ def status_check():
 @limiter.limit("60/minute")
 @basic_auth.required
 def handle_message_request(userId):
-    request_data = request.get_json()
-    print(request_data)
+    response_object = CreateMessageResponse(request=request.get_json())
 
-    data = request_data
     response = app.response_class(
-        response=json.dumps(data),
-        status=201,
+        response=response_object.to_json(),
+        status=202,
         mimetype='application/json'
     )
+
+    send_callback(data=response_object)
+
     return response
 
 
