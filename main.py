@@ -36,8 +36,8 @@ timeSlice = 1/10            # 100ms between messages
 
 currentTime = datetime.now()
 lastSendTime = currentTime
-nextSendTime = float_to_datetime(datetime_to_float(currentTime) + maxQueueTime)
-nextSendTime = float_to_datetime(datetime_to_float(currentTime) + maxQueueTime + 1000)
+# nextSendTime = float_to_datetime(datetime_to_float(currentTime) + maxQueueTime)
+nextSendTime = float_to_datetime(0.0)
 
 
 def send_callback(data):
