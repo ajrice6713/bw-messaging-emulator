@@ -7,8 +7,6 @@ from datetime import datetime, timedelta
 from models.create_message_response import CreateMessageResponse
 from utils.utils import datetime_to_float, float_to_datetime
 
-from rich import print, inspect
-
 from flask import Flask, request
 from flask_basicauth import BasicAuth
 
