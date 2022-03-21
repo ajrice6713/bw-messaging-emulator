@@ -1,7 +1,7 @@
 import os
 import json
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from models.callback import Callback
 from models.create_message_response import CreateMessageResponse
@@ -30,14 +30,14 @@ app.config['BASIC_AUTH_REALM'] = 'api'
 
 basic_auth = BasicAuth(app)
 
-maxQueueTime = 15.0*60.0    # e.g. default 15 minute queue
+maxQueueTime = 15.0*60.0   # e.g. default 15 minute queue
 rateLimit = 1              # mps
-timeSlice = 1/10            # 100ms between messages
+timeSlice = timedelta(seconds=((1/rateLimit)/10))    # 100ms between messages
+print(f'timeslice: {timeSlice}')
 
 currentTime = datetime.now()
 lastSendTime = currentTime
-# nextSendTime = float_to_datetime(datetime_to_float(currentTime) + maxQueueTime)
-nextSendTime = float_to_datetime(0.0)
+nextSendTime = 0.0
 
 
 def send_callback(data):
@@ -50,24 +50,19 @@ def send(response_object):
     global lastSendTime 
     global nextSendTime
 
-    print("----------")
-    print(f'Max queue Time: {maxQueueTime}')
-    print(f'Current Time: {currentTime}')
-    print(f'Last Send Time: {lastSendTime}')
-    print(f'Next Send Time: {nextSendTime}')
-    print("----------")
+    # print("----------")
+    # print(f'Max queue Time: {maxQueueTime}')
+    # print(f'Current Time: {currentTime}')
+    # print(f'Last Send Time: {lastSendTime}')
+    # print(f'Next Send Time: {nextSendTime}')
+    # print("----------")
 
-    if datetime_to_float(nextSendTime) < (datetime_to_float(currentTime) + maxQueueTime) :
-        currentTime = datetime.now()
-        
-        print("-----ERROR-----")
-        print(f'Max queue Time: {maxQueueTime}')
-        print(f'Current Time: {currentTime}')
-        print(f'Last Send Time: {lastSendTime}')
-        print(f'Next Send Time: {nextSendTime}')
-        print(f'{datetime_to_float(nextSendTime)} < {datetime_to_float(currentTime) + maxQueueTime}')
-        print("-----ERROR-----")
-
+    currentTime = datetime.now()
+    nextSendTime = (max(lastSendTime, currentTime)) + timeSlice
+    print(f'nextSendTime: {nextSendTime}')
+    
+    if nextSendTime > float_to_datetime(datetime_to_float(currentTime) + maxQueueTime) :
+        print(nextSendTime)
         return '429 error', 429
     else:
         currentTime = datetime.now()
@@ -76,12 +71,10 @@ def send(response_object):
             status=202,
             mimetype='application/json'
         )
-        nextSendTime = float_to_datetime(max(datetime_to_float(lastSendTime), datetime_to_float(currentTime) + timeSlice))
-        lastSendTime = currentTime
+        lastSendTime = nextSendTime
         
         print("----------")
-        print(f'New next Send Time: {nextSendTime}')
-        print(f'New last Send Time: {lastSendTime}')
+        print(f'New nextSendTime: {nextSendTime}')
         print("----------")
 
         send_callback(response_object)
