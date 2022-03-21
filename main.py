@@ -3,7 +3,7 @@ import json
 
 from datetime import datetime, timedelta
 
-from models.callback import Callback
+# from models.callback import Callback
 from models.create_message_response import CreateMessageResponse
 from utils.utils import datetime_to_float, float_to_datetime
 
@@ -32,9 +32,9 @@ lastSendTime = currentTime
 nextSendTime = 0.0
 
 
-def send_callback(data):
-    callback_object = Callback(data)
-    return
+# def send_callback(data):
+#     callback_object = Callback(data)
+#     return
 
 
 def send(response_object):     
@@ -57,7 +57,7 @@ def send(response_object):
         )
         lastSendTime = nextSendTime
 
-        send_callback(response_object)
+        # send_callback(response_object)
         return response
 
 
