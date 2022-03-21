@@ -8,6 +8,7 @@ flask = "*"
 flask-limiter = "*"
 flask-basicauth = "*"
 requests = "*"
+sms-counter = {git = "https://github.com/dedayoa/sms-counter-python.git"}
 
 [dev-packages]
 

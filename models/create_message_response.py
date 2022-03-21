@@ -1,7 +1,9 @@
 import datetime
 import json
-from typing import Dict
 import uuid
+
+from typing import Dict
+from sms_counter import SMSCounter
 
 
 class CreateMessageResponse: 
@@ -10,6 +12,8 @@ class CreateMessageResponse:
         self.owner = request['from']
         self.applicationId = request['applicationId']
         self.time = str(datetime.datetime.utcnow().isoformat())
+        self.segmentCount = 1
+        self.direction = 'out'
 
         if type(request['to']) is str:
             self.to = [request['to']]
@@ -26,6 +30,9 @@ class CreateMessageResponse:
         if 'priority' in request:
             self.priority = request['priority']
     
+    def calculate_segments(self, message) -> int:
+        count = SMSCounter.count(message)
+        return count['messages']
    
     def to_json(self) -> str:
         dict_response = {
@@ -33,12 +40,15 @@ class CreateMessageResponse:
             'owner': self.owner,
             'applicationId': self.applicationId,
             'time': self.time,
+            'direction': self.direction,
             'to': self.to,
             'from': self.mfrom
         }
         
         if hasattr(self, 'media'): dict_response['media'] = self.media
-        if hasattr(self, 'text'): dict_response['text'] = self.text
+        if hasattr(self, 'text'): 
+            dict_response['text'] = self.text
+            dict_response['segmentCount'] = self.calculate_segments(self.text)
         if hasattr(self, 'tag'): dict_response['tag'] = self.tag
         if hasattr(self, 'priority'): dict_response['priority'] = self.priority
         

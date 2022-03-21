@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "d369dc60b3d75228b684dac7eea5571a6dc51709e4e2e7cadd8efee06ee3e110"
+            "sha256": "59951a89804ef689a9d8b84105d4cbe95dff58bb240f97f3f57d976ec397cd41"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -156,6 +156,10 @@
             ],
             "markers": "python_version >= '3.7'",
             "version": "==60.10.0"
+        },
+        "sms-counter": {
+            "git": "https://github.com/dedayoa/sms-counter-python.git",
+            "ref": "87e799ac88928881622c75a175d204d91abe187b"
         },
         "urllib3": {
             "hashes": [

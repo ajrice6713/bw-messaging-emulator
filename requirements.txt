@@ -12,6 +12,7 @@ click==8.0.4; python_version >= '3.6'
 flask-basicauth==0.2.0
 flask-limiter==2.2.0
 flask==2.0.3
+git+https://github.com/dedayoa/sms-counter-python.git@87e799ac88928881622c75a175d204d91abe187b#egg=sms-counter
 idna==3.3; python_version >= '3'
 itsdangerous==2.1.1; python_version >= '3.7'
 jinja2==3.0.3; python_version >= '3.6'
