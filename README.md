@@ -2,6 +2,15 @@
 
 A flask API to test Bandwidth's Messaging API Rate Limit Logic
 
+## Environment Variables 
+
+The application uses environment variables for your api username and password. While not required and can be removed in the `main.py` file, we wanted to fully immitate the experience, so auth is required. 
+
+```sh
+BW_USERNAME=mySecretUsername
+BW_PASSWORD-mySecretPassword
+```
+
 ## Getting Started 
 
 ```sh
