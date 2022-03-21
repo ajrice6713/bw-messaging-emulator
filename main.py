@@ -10,19 +10,12 @@ from utils.utils import datetime_to_float, float_to_datetime
 from rich import print, inspect
 
 from flask import Flask, request
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
 from flask_basicauth import BasicAuth
 
 username = os.environ['BW_USERNAME']
 password = os.environ['BW_PASSWORD']
 
 app = Flask(__name__)
-limiter = Limiter(
-    app,
-    key_func=get_remote_address
-    # default_limits=["60/minute"]
-)
 
 app.config['BASIC_AUTH_USERNAME'] = username
 app.config['BASIC_AUTH_PASSWORD'] = password
@@ -30,10 +23,9 @@ app.config['BASIC_AUTH_REALM'] = 'api'
 
 basic_auth = BasicAuth(app)
 
-maxQueueTime = 15.0*60.0   # e.g. default 15 minute queue
-rateLimit = 1              # mps
+maxQueueTime = 15.0*60.0                      # e.g. default 15 minute queue
+rateLimit = 1                                 # mps
 timeSlice = timedelta(seconds=(1/rateLimit))  # 100ms between messages
-print(f'timeslice: {timeSlice}')
 
 currentTime = datetime.now()
 lastSendTime = currentTime
@@ -50,23 +42,13 @@ def send(response_object):
     global lastSendTime 
     global nextSendTime
 
-    # print("----------")
-    # print(f'Max queue Time: {maxQueueTime}')
-    # print(f'Current Time: {currentTime}')
-    # print(f'Last Send Time: {lastSendTime}')
-    # print(f'Next Send Time: {nextSendTime}')
-    # print("----------")
-
     currentTime = datetime.now()
     nextSendTime = (max(lastSendTime, currentTime)) + timeSlice
     print(f'nextSendTime: {nextSendTime}')
     
     if nextSendTime > float_to_datetime(datetime_to_float(currentTime) + maxQueueTime) :
-        print(f'{nextSendTime} < {float_to_datetime(datetime_to_float(currentTime) + maxQueueTime)}')
-        print(nextSendTime)
         return '429 error', 429
     else:
-        print(f'{nextSendTime} < {float_to_datetime(datetime_to_float(currentTime) + maxQueueTime)}')
         currentTime = datetime.now()
         response = app.response_class(
             response=response_object.to_json(),
@@ -74,20 +56,12 @@ def send(response_object):
             mimetype='application/json'
         )
         lastSendTime = nextSendTime
-        
-        print("----------")
-        print(f'Max queue Time: {maxQueueTime}')
-        print(f'Current Time: {currentTime}')
-        print(f'Last Send Time: {lastSendTime}')
-        print(f'Next Send Time: {nextSendTime}')
-        print("----------")
 
         send_callback(response_object)
         return response
 
 
 @app.route('/', methods=['GET'])
-# @limiter.limit("5/minute", override_defaults=True)
 @basic_auth.required
 def status_check():
     data = {'message': 'hello world'}
@@ -101,7 +75,6 @@ def status_check():
 
 
 @app.route('/users/<userId>/messages', methods=['POST'])
-# @limiter.limit("60/minute")
 @basic_auth.required
 def handle_message_request(userId):
     response_object = CreateMessageResponse(request=request.get_json())
