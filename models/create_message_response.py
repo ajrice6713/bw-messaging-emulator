@@ -1,6 +1,7 @@
 import datetime
 import json
-import uuid
+import random
+import string
 
 from typing import Dict
 from sms_counter import SMSCounter
@@ -8,7 +9,7 @@ from sms_counter import SMSCounter
 
 class CreateMessageResponse: 
     def __init__(self, request):
-        self.id = str(uuid.uuid4())
+        self.id = self.generate_id()
         self.owner = request['from']
         self.applicationId = request['applicationId']
         self.time = str(datetime.datetime.utcnow().isoformat())
@@ -30,10 +31,17 @@ class CreateMessageResponse:
         if 'priority' in request:
             self.priority = request['priority']
     
+
     def calculate_segments(self, message) -> int:
         count = SMSCounter.count(message)
         return count['messages']
+    
+
+    def generate_id(self) -> str:
+        pre = random.randint(1400000000000,1799999999999)
+        return str(pre) + ''.join(random.choice(string.ascii_lowercase) for x in range(16))
    
+
     def to_json(self) -> str:
         dict_response = {
             'id': self.id,
@@ -51,5 +59,4 @@ class CreateMessageResponse:
             dict_response['segmentCount'] = self.calculate_segments(self.text)
         if hasattr(self, 'tag'): dict_response['tag'] = self.tag
         if hasattr(self, 'priority'): dict_response['priority'] = self.priority
-        
         return json.dumps(dict_response)

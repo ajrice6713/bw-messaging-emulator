@@ -54,7 +54,6 @@ def send(response_object):
             mimetype='application/json'
         )
         lastSendTime = nextSendTime
-
         # send_callback(response_object)
         return response
 
@@ -68,7 +67,6 @@ def status_check():
         status=200,
         mimetype='application/json'
     )
-    print(f'Last Send Time: {lastSendTime}')
     return response
 
 
