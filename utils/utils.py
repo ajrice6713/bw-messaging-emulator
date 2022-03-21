@@ -1,9 +1,8 @@
 from datetime import datetime
 
+
 def datetime_to_float(d):
-    epoch = datetime.fromtimestamp(0)
-    total_seconds =  (d - epoch).total_seconds()
-    return total_seconds
+    return d.timestamp()
 
 
 def float_to_datetime(fl):

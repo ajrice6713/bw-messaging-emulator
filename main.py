@@ -32,7 +32,7 @@ basic_auth = BasicAuth(app)
 
 maxQueueTime = 15.0*60.0   # e.g. default 15 minute queue
 rateLimit = 1              # mps
-timeSlice = timedelta(seconds=((1/rateLimit)/10))    # 100ms between messages
+timeSlice = timedelta(seconds=(1/rateLimit))  # 100ms between messages
 print(f'timeslice: {timeSlice}')
 
 currentTime = datetime.now()
@@ -62,9 +62,11 @@ def send(response_object):
     print(f'nextSendTime: {nextSendTime}')
     
     if nextSendTime > float_to_datetime(datetime_to_float(currentTime) + maxQueueTime) :
+        print(f'{nextSendTime} < {float_to_datetime(datetime_to_float(currentTime) + maxQueueTime)}')
         print(nextSendTime)
         return '429 error', 429
     else:
+        print(f'{nextSendTime} < {float_to_datetime(datetime_to_float(currentTime) + maxQueueTime)}')
         currentTime = datetime.now()
         response = app.response_class(
             response=response_object.to_json(),
@@ -74,7 +76,10 @@ def send(response_object):
         lastSendTime = nextSendTime
         
         print("----------")
-        print(f'New nextSendTime: {nextSendTime}')
+        print(f'Max queue Time: {maxQueueTime}')
+        print(f'Current Time: {currentTime}')
+        print(f'Last Send Time: {lastSendTime}')
+        print(f'Next Send Time: {nextSendTime}')
         print("----------")
 
         send_callback(response_object)
